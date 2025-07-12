@@ -113,7 +113,7 @@ export default function CompanyTable() {
 
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-indigo-700">
             <th className="p-2">Name</th>
             <th className="p-2">Location</th>
             <th className="p-2">Rating</th>
@@ -125,6 +125,14 @@ export default function CompanyTable() {
         </thead>
         <tbody>
           {companies.map((company) => {
+            const rowDetails = {
+              Name: company.name,
+              Location: company.location,
+              Rating: company.google_maps_rating,
+              Reviews: company.number_of_reviews,
+              Services: company.services,
+            };
+
             const statuses = {
               "Not Applied":
                 !company.is_applied &&
@@ -140,6 +148,17 @@ export default function CompanyTable() {
               Offer: !!company.has_offer,
             };
 
+            console.groupCollapsed(
+              `📋 Row for ${company.name} (ID ${company.id})`
+            );
+            console.table(rowDetails); // shows the basic columns
+            console.table(statuses); // shows every status flag
+
+            Object.entries(statuses).forEach(
+              ([k, v]) => console.log(`• ${k.padEnd(11)} ➜ ${v}`) // line‑by‑line prefix view
+            );
+            console.groupEnd();
+
             // Log the company and its statuses
             console.log(`Company: ${company.name} (ID: ${company.id})`);
             console.table(statuses);
@@ -151,7 +170,7 @@ export default function CompanyTable() {
                 <td className="p-2">{company.google_maps_rating}</td>
                 <td className="p-2">{company.number_of_reviews}</td>
                 <td className="p-2">{company.services}</td>
-                <td className="p-2 flex flex-wrap gap-2">
+                <td className="p-2 flex space-y-2 gap-2">
                   {Object.entries({
                     "Not Applied":
                       !company.is_applied &&
