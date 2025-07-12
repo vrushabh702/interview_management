@@ -1,5 +1,17 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, act } from "react";
+
+import {
+  faCheckCircle,
+  faHeart,
+  faHandshake,
+  faComments,
+  faTimesCircle,
+  faGift,
+  faPen,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function CompanyTable() {
   const [companies, setCompanies] = useState([]);
@@ -148,6 +160,24 @@ export default function CompanyTable() {
               Offer: !!company.has_offer,
             };
 
+            const statusIcons = {
+              Applied: faCheckCircle,
+              Favorite: faHeart,
+              Approached: faHandshake,
+              Interview: faComments,
+              Rejected: faTimesCircle,
+              Offer: faGift,
+            };
+
+            const statusConditions = {
+              Applied: company.is_applied,
+              Favorite: company.is_favorite,
+              Approached: company.is_approached || company.is_pending,
+              Interview: company.in_interview_process,
+              Rejected: company.is_rejected,
+              Offer: company.has_offer,
+            };
+
             console.groupCollapsed(
               `📋 Row for ${company.name} (ID ${company.id})`
             );
@@ -170,47 +200,42 @@ export default function CompanyTable() {
                 <td className="p-2">{company.google_maps_rating}</td>
                 <td className="p-2">{company.number_of_reviews}</td>
                 <td className="p-2">{company.services}</td>
-                <td className="p-2 flex space-y-2 gap-2">
-                  {Object.entries({
-                    "Not Applied":
-                      !company.is_applied &&
-                      !company.is_approached &&
-                      !company.in_interview_process &&
-                      !company.is_rejected &&
-                      !company.has_offer,
-                    Applied: company.is_applied,
-                    Favorite: company.is_favorite,
-                    Approached: company.is_approached || company.is_pending,
-                    Interview: company.in_interview_process,
-                    Rejected: company.is_rejected,
-                    Offer: company.has_offer,
-                  }).map(
-                    ([label, active]) =>
-                      active && (
-                        <span
-                          key={label}
-                          className={`text-xs font-semibold px-2 py-1 rounded bg-${
-                            statusColors[label.toLowerCase().replace(" ", "_")]
-                          }`}
-                        >
-                          {label}
-                        </span>
-                      )
-                  )}
+                <td className="p-2 flex flex-wrap gap-2">
+                  {Object.entries(statusConditions).map(([label, active]) => (
+                    <span
+                      key={label}
+                      className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded bg-${
+                        active
+                          ? "bg-green-200 text-green-700 cursor-pointer"
+                          : "bg-red-200 text-red-700 cursor-pointer"
+                      }`}
+                    >
+                      <FontAwesomeIcon
+                        icon={statusIcons[label]}
+                        className={`${
+                          !active ? "opacity-50 cursor-pointer" : ""
+                        }`}
+                      />
+                      {label}
+                    </span>
+                  ))}
                 </td>
-                <td className="p-2">
-                  <button
-                    onClick={() => setShowEditModal(company)}
-                    className="bg-blue-500 text-white p-1 rounded mr-2"
-                  >
-                    Edit Status
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCompany(company.id)}
-                    className="bg-red-500 text-white p-1 rounded"
-                  >
-                    Delete
-                  </button>
+
+                <td className="p-2 ">
+                  <div className="flex">
+                    <button
+                      onClick={() => setShowEditModal(company)}
+                      className="bg-blue-500 text-white p-2 rounded mr-2 cursor-pointer"
+                    >
+                      <FontAwesomeIcon icon={faPen} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCompany(company.id)}
+                      className="bg-red-500 text-white p-2 rounded cursor-pointer"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             );
@@ -219,8 +244,8 @@ export default function CompanyTable() {
       </table>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black  flex items-center justify-center">
-          <div className=" p-6 rounded-lg w-1/2">
+        <div className="fixed inset-0   flex items-center justify-center">
+          <div className=" p-6 rounded-lg w-1/2 bg-gray-700">
             <h2 className="text-xl mb-4">Add Company</h2>
             <form onSubmit={handleAddCompany}>
               <input
@@ -296,8 +321,8 @@ export default function CompanyTable() {
       )}
 
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-1/2">
+        <div className="fixed inset-0  bg-opacity-10 flex items-center justify-center">
+          <div className="bg-gray-500 p-6 rounded-lg w-1/2">
             <h2 className="text-xl mb-4">
               Edit Status for {showEditModal.name}
             </h2>
